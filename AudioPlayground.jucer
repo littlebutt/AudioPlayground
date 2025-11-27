@@ -4,10 +4,19 @@
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
   <MAINGROUP id="qOrhlI" name="AudioPlayground">
     <GROUP id="{A7A9B5E2-440F-9474-A1A1-D8EB12144CC3}" name="Source">
+      <GROUP id="{48B7FD60-49B3-2552-1A98-4DFB3AA98DB1}" name="components">
+        <FILE id="i7EJKh" name="ControlBar.cpp" compile="1" resource="0" file="Source/components/ControlBar.cpp"/>
+        <FILE id="SL0DYd" name="ControlBar.h" compile="0" resource="0" file="Source/components/ControlBar.h"/>
+      </GROUP>
+      <FILE id="Jt1qRh" name="AudioPlayerContext.cpp" compile="1" resource="0"
+            file="Source/AudioPlayerContext.cpp"/>
+      <FILE id="jChGgH" name="AudioPlayerContext.h" compile="0" resource="0"
+            file="Source/AudioPlayerContext.h"/>
+      <FILE id="kMknyc" name="globals.h" compile="0" resource="0" file="Source/globals.h"/>
       <FILE id="lYqNlH" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
-      <FILE id="rqaC1k" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
       <FILE id="xSGZAu" name="MainComponent.cpp" compile="1" resource="0"
             file="Source/MainComponent.cpp"/>
+      <FILE id="rqaC1k" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
     </GROUP>
   </MAINGROUP>
   <MODULES>

@@ -2,8 +2,12 @@
 
 //==============================================================================
 MainComponent::MainComponent()
+: ctx()
 {
-    setSize (600, 400);
+    addAndMakeVisible(controlBar);
+    setSize(600, 400);
+    audioFormatManager.registerBasicFormats();
+    setAudioChannels(0, 2);
 }
 
 MainComponent::~MainComponent()
@@ -11,19 +15,36 @@ MainComponent::~MainComponent()
 }
 
 //==============================================================================
-void MainComponent::paint (juce::Graphics& g)
+void MainComponent::paint(juce::Graphics& g)
 {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
-
-    g.setFont (juce::FontOptions (16.0f));
-    g.setColour (juce::Colours::white);
-    g.drawText ("Hello World!", getLocalBounds(), juce::Justification::centred, true);
+    g.fillAll(getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
 }
 
 void MainComponent::resized()
 {
-    // This is called when the MainComponent is resized.
-    // If you add any child components, this is where you should
-    // update their positions.
+    auto bounds = getLocalBounds();
+    controlBar.setBounds(bounds.removeFromBottom(bounds.getHeight() / 6));
+
+}
+
+void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
+{
+    transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
+}
+
+void MainComponent::releaseResources()
+{
+    transportSource.releaseResources();
+}
+
+void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
+{
+    if (readerSource.get() == nullptr)
+    {
+        bufferToFill.clearActiveBufferRegion();
+        return;
+    }
+
+    transportSource.getNextAudioBlock(bufferToFill);
 }

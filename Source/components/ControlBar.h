@@ -15,13 +15,13 @@ public:
     void resized() override;
 
 private:
-    juce::Path drawPlay() const;
-    juce::Path drawPause() const;
-    juce::Path drawStop() const;
+    // void onClickPlayAndPause();
+    // void onClickStop();
+    void onClickLoad();
 
-    juce::ShapeButton playAndPause, stop;
+    juce::TextButton playAndPause, stop, load;
     juce::Slider progressSlider;
+    juce::Label currentLengthLabel, totalLengthLabel;
+    std::unique_ptr<juce::FileChooser> chooser;
     AudioPlayerContext& ctx;
-
-    
 };

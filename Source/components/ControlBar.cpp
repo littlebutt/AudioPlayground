@@ -1,25 +1,29 @@
 #include "ControlBar.h"
 
 ControlBar::ControlBar(AudioPlayerContext& ctx)
-: ctx(ctx),
-playAndPause("playAndPause", juce::Colours::grey, juce::Colours::red, juce::Colours::grey),
-stop("stop", juce::Colours::grey, juce::Colours::red, juce::Colours::grey)
+: ctx(ctx)
 {
     if (ctx.state == PLAYING)
     {
-        playAndPause.setShape(drawPause(), true, true, false);
         playAndPause.setButtonText("Pause");
     }
     else
     {
-        playAndPause.setShape(drawPlay(), true, true, false);
         playAndPause.setButtonText("Play");
     }
     addAndMakeVisible(playAndPause);
-    
-    stop.setShape(drawStop(), true, true, false);
+
     stop.setButtonText("Stop");
     addAndMakeVisible(stop);
+
+    load.setButtonText("Load");
+    addAndMakeVisible(load);
+
+    currentLengthLabel.setText("00:00", juce::NotificationType::dontSendNotification);
+    addAndMakeVisible(currentLengthLabel);
+
+    totalLengthLabel.setText("00:00", juce::NotificationType::dontSendNotification);
+    addAndMakeVisible(totalLengthLabel);
 
     progressSlider.setSliderStyle(juce::Slider::LinearHorizontal);
     progressSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
@@ -41,41 +45,54 @@ void ControlBar::resized()
     bounds.removeFromLeft(10);
     bounds.removeFromRight(10);
 
+    juce::FlexBox labelFlexBox;
+    labelFlexBox.flexDirection = juce::FlexBox::Direction::row;
+    labelFlexBox.flexWrap = juce::FlexBox::Wrap::wrap;
+    labelFlexBox.justifyContent = juce::FlexBox::JustifyContent::spaceBetween;
+    labelFlexBox.items.add(juce::FlexItem(currentLengthLabel).withWidth(50));
+    labelFlexBox.items.add(juce::FlexItem(totalLengthLabel).withWidth(50));
+
+    juce::FlexBox progressFlexBox;
+    progressFlexBox.flexDirection = juce::FlexBox::Direction::column;
+    progressFlexBox.flexWrap = juce::FlexBox::Wrap::wrap;
+    progressFlexBox.items.add(juce::FlexItem(labelFlexBox).withFlex(50));
+    progressFlexBox.items.add(juce::FlexItem(progressSlider).withFlex(50));
+
     juce::FlexBox flexBox;
     flexBox.flexDirection = juce::FlexBox::Direction::row;
     flexBox.flexWrap = juce::FlexBox::Wrap::wrap;
-    flexBox.items.add(juce::FlexItem(playAndPause).withFlex(15));
-    flexBox.items.add(juce::FlexItem(stop).withFlex(15));
-    flexBox.items.add(juce::FlexItem(progressSlider).withFlex(70));
+    flexBox.items.add(juce::FlexItem(playAndPause).withFlex(10));
+    flexBox.items.add(juce::FlexItem(stop).withFlex(10));
+    flexBox.items.add(juce::FlexItem(progressFlexBox).withFlex(70));
+    flexBox.items.add(juce::FlexItem(load).withFlex(10));
     flexBox.performLayout(bounds);
 }
 
-juce::Path ControlBar::drawPlay() const
-{
-    juce::Path p;
-    p.startNewSubPath(20.0f, 10.0f);
-    p.lineTo(80.0f, 50.0f);
-    p.lineTo(20.0f, 90.0f);
-    p.closeSubPath();
-    return p;
-}
 
-juce::Path ControlBar::drawPause() const
-{
-    juce::Path p;
+    void ControlBar::onClickLoad()
+    {
+        chooser = std::make_unique<juce::FileChooser>("Select a Wave file to play...",
+                                                    juce::File{},
+                                                    "*.wav");
+        auto chooserFlags = juce::FileBrowserComponent::openMode
+                            | juce::FileBrowserComponent::canSelectFiles;
 
-    float barWidth = 20.0f;
-    float gap = 10.0f;
+        chooser->launchAsync(chooserFlags, [this](const juce::FileChooser& fc)
+        {
+            auto file = fc.getResult();
 
-    p.addRectangle(20.0f, 10.0f, barWidth, 80.0f);
-    p.addRectangle(20.0f + barWidth + gap, 10.0f, barWidth, 80.0f);
+            if (file != juce::File{})
+            {
+                auto* reader = ctx.audioFormatManager.createReaderFor(file);
+                if (reader != nullptr)
+                {
+                    auto newSource = std::make_unique<juce::AudioFormatReaderSource>(reader, true);
+                    ctx.transportSource.setSource(newSource.get(), 0, nullptr, reader->sampleRate);
+                    ctx.readerSource.reset(newSource.release());
+                    playAndPause.setButtonText("Play");
+                    progressSlider.setRange(0.f, ctx.transportSource.getLengthInSeconds(), 0.f);
+                }
+            }
+        });
 
-    return p;
-}
-
-juce::Path ControlBar::drawStop() const
-{
-    juce::Path p;
-    p.addRectangle(20.0f, 20.0f, 60.0f, 60.0f);
-    return p;
-}
+    }

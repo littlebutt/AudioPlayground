@@ -12,6 +12,9 @@ public:
 
     juce::String songName;
     TransportState state;
+    juce::AudioTransportSource transportSource;
+    juce::AudioFormatManager audioFormatManager;
+    std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
     int totalLengthSec;
     int currentLengthSec;
 };

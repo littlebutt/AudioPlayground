@@ -29,9 +29,6 @@ public:
 private:
     //==============================================================================
     // Your private member variables go here...
-    juce::AudioFormatManager audioFormatManager;
-    std::unique_ptr<juce::AudioFormatReaderSource> readerSource;
-    juce::AudioTransportSource transportSource;
     AudioPlayerContext ctx;
     ControlBar controlBar = { ctx };
 

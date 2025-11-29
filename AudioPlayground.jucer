@@ -12,8 +12,8 @@
             file="Source/AudioPlayerContext.cpp"/>
       <FILE id="jChGgH" name="AudioPlayerContext.h" compile="0" resource="0"
             file="Source/AudioPlayerContext.h"/>
-      <FILE id="kMknyc" name="globals.h" compile="0" resource="0" file="Source/globals.h"/>
       <FILE id="lYqNlH" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+      <FILE id="mAWVJF" name="Globals.h" compile="0" resource="0" file="Source/Globals.h"/>
       <FILE id="xSGZAu" name="MainComponent.cpp" compile="1" resource="0"
             file="Source/MainComponent.cpp"/>
       <FILE id="rqaC1k" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>

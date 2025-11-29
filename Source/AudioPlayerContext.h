@@ -2,7 +2,7 @@
 
 #include <JuceHeader.h>
 
-#include "globals.h"
+#include "Globals.h"
 
 class AudioPlayerContext
 {

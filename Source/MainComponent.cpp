@@ -5,7 +5,7 @@ MainComponent::MainComponent()
 : ctx()
 {
     addAndMakeVisible(controlBar);
-    setSize(800, 600);
+    setSize(600, 400);
     ctx.audioFormatManager.registerBasicFormats();
     setAudioChannels(0, 2);
     ctx.state = STOPPED;
@@ -19,14 +19,13 @@ MainComponent::~MainComponent()
 //==============================================================================
 void MainComponent::paint(juce::Graphics& g)
 {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
-    g.fillAll(getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));
+    g.fillAll(juce::Colours::white);
 }
 
 void MainComponent::resized()
 {
     auto bounds = getLocalBounds();
-    controlBar.setBounds(bounds.removeFromBottom(100));
+    controlBar.setBounds(bounds.removeFromBottom(80));
 
 }
 

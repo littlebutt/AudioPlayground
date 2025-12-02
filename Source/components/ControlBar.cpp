@@ -1,7 +1,9 @@
 #include "ControlBar.h"
 
 ControlBar::ControlBar(AudioPlayerContext& ctx)
-: ctx(ctx)
+: ctx(ctx),
+thumbnailCache(1),
+thumbnail(512, ctx.audioFormatManager, thumbnailCache)
 {
 
     componentImage = juce::ImageCache::getFromMemory(BinaryData::components_png, BinaryData::components_pngSize);
@@ -42,6 +44,7 @@ ControlBar::ControlBar(AudioPlayerContext& ctx)
     progressSlider.setSliderStyle(juce::Slider::LinearHorizontal);
     progressSlider.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
     progressSlider.setRange(0.0, 1, 0.0);
+    progressSlider.setLookAndFeel(&progressSliderLnF);
     progressSlider.onDragStart = [this] { isSeeking.store(true); };
     progressSlider.onDragEnd = [this] { isSeeking.store(false); };
     progressSlider.onValueChange = [this] {
@@ -54,11 +57,29 @@ ControlBar::ControlBar(AudioPlayerContext& ctx)
 
 ControlBar::~ControlBar()
 {
+    progressSlider.setLookAndFeel(nullptr);
 }
 
 void ControlBar::paint(juce::Graphics& g)
 {
-    g.fillAll(juce::Colour(51, 51, 51));
+    g.fillAll(juce::Colour(36, 36, 36));
+
+    auto track = progressSlider.getLookAndFeel()
+            .getSliderLayout(progressSlider).sliderBounds + progressSlider.getPosition();
+    auto thumbnailBound = track.withHeight(progressSlider.getHeight());
+    g.setColour(juce::Colour(51, 51, 51));
+    thumbnail.drawChannel(g,
+        thumbnailBound,
+        0.0,
+        thumbnail.getTotalLength(),
+        1,
+        1.0f); 
+    thumbnail.drawChannel(g,
+        thumbnailBound,
+        0.0,
+        thumbnail.getTotalLength(),
+        0,
+        1.0f); 
 }
 
 void ControlBar::resized()
@@ -78,8 +99,8 @@ void ControlBar::resized()
     progressFlexBox.flexDirection = juce::FlexBox::Direction::column;
     progressFlexBox.flexWrap = juce::FlexBox::Wrap::wrap;
     progressFlexBox.items.add(juce::FlexItem(songNameLabel).withFlex(20));
-    progressFlexBox.items.add(juce::FlexItem(labelFlexBox).withFlex(40));
     progressFlexBox.items.add(juce::FlexItem(progressSlider).withFlex(40));
+    progressFlexBox.items.add(juce::FlexItem(labelFlexBox).withFlex(20));
 
     juce::FlexBox flexBox;
     flexBox.flexDirection = juce::FlexBox::Direction::row;
@@ -98,8 +119,37 @@ void ControlBar::timerCallback()
         progressSlider.setValue(ctx.transportSource.getCurrentPosition(), juce::NotificationType::dontSendNotification);
     }
     currentLengthLabel.setText(convertSec2Min(progressSlider.getValue()), juce::NotificationType::dontSendNotification);
+    repaint();
 }
 
+void ControlBar::changeListenerCallback(juce::ChangeBroadcaster* source)
+{
+    if (source == &thumbnail)
+    {
+        repaint();
+    }
+}
+
+void ControlBar::ProgressSliderLnF::drawLinearSlider(juce::Graphics& g,
+                                                        int x, int y,
+                                                        int width, int height,
+                                                        float sliderPos,
+                                                        float minSliderPos,
+                                                        float maxSliderPos,
+                                                        const juce::Slider::SliderStyle style,
+                                                        juce::Slider& slider)
+{
+    auto lineY = y + height / 2;
+
+    g.setColour(juce::Colours::white.withAlpha(0.2f));
+    g.drawLine((float)x, (float)lineY,
+                (float)(x + width), (float)lineY,
+                2.0f);
+    g.setColour(juce::Colour(194, 12, 12));
+    const int lineWidth = 2;
+    int lineX = (int)sliderPos - lineWidth / 2;
+    g.fillRect(lineX, 0, lineWidth, slider.getHeight());
+}
 
 void ControlBar::onClickLoad()
 {
@@ -128,6 +178,7 @@ void ControlBar::onClickLoad()
                 songNameLabel.setText(ctx.songName, juce::NotificationType::dontSendNotification);
                 progressSlider.setRange(0.f, ctx.totalLengthSec, 0.f);
                 totalLengthLabel.setText(convertSec2Min(ctx.totalLengthSec), juce::NotificationType::dontSendNotification);
+                thumbnail.setSource(new juce::FileInputSource(file));
             }
         }
     });

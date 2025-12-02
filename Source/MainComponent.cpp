@@ -5,7 +5,7 @@ MainComponent::MainComponent()
 : ctx()
 {
     addAndMakeVisible(controlBar);
-    setSize(600, 400);
+    setSize(800, 600);
     ctx.audioFormatManager.registerBasicFormats();
     setAudioChannels(0, 2);
     ctx.state = STOPPED;
@@ -19,7 +19,7 @@ MainComponent::~MainComponent()
 //==============================================================================
 void MainComponent::paint(juce::Graphics& g)
 {
-    g.fillAll(juce::Colours::white);
+    g.fillAll(juce::Colour(245, 245, 245));
 }
 
 void MainComponent::resized()

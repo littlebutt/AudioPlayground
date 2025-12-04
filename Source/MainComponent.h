@@ -4,6 +4,7 @@
 
 #include "./AudioPlayerContext.h"
 #include "components/ControlBar.h"
+#include "components/Spectrum.h"
 
 //==============================================================================
 /*
@@ -31,6 +32,7 @@ private:
     // Your private member variables go here...
     AudioPlayerContext ctx;
     ControlBar controlBar = { ctx };
+    Spectrum spectrum = { ctx };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

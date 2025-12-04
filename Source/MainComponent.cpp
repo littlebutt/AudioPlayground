@@ -4,6 +4,7 @@
 MainComponent::MainComponent()
 : ctx()
 {
+    addAndMakeVisible(spectrum);
     addAndMakeVisible(controlBar);
     setSize(800, 600);
     ctx.audioFormatManager.registerBasicFormats();
@@ -25,6 +26,7 @@ void MainComponent::paint(juce::Graphics& g)
 void MainComponent::resized()
 {
     auto bounds = getLocalBounds();
+    spectrum.setBounds(bounds.removeFromTop(250));
     controlBar.setBounds(bounds.removeFromBottom(80));
 
 }
@@ -48,4 +50,13 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
     }
 
     ctx.transportSource.getNextAudioBlock(bufferToFill);
+
+    if (bufferToFill.buffer->getNumChannels() > 0)
+    {
+        auto* channelData = bufferToFill.buffer->getReadPointer(0, bufferToFill.startSample);
+        for (auto i = 0; i < bufferToFill.numSamples; ++i)
+        {
+            ctx.pushNextSampleIntoFifo(channelData[i]);
+        }
+    }
 }

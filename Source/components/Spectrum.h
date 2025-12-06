@@ -1,8 +1,10 @@
+#pragma once
+
 #include <JuceHeader.h>
 
 #include "../AudioPlayerContext.h"
 
-class Spectrum : public juce::Component
+class Spectrum : public juce::Component, public juce::Timer
 {
 public:
     Spectrum(AudioPlayerContext& ctx);
@@ -12,7 +14,12 @@ public:
     void paint(juce::Graphics& g) override;
     void resized() override;
 
+    // Override juce::Timer
+    void timerCallback() override;
+
 private:
+    void process(juce::Rectangle<float> fftBounds, double sampleRate);
+
     AudioPlayerContext& ctx;
     juce::Array<float> freqs = {
         20, 50, 100,

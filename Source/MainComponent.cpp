@@ -33,7 +33,12 @@ void MainComponent::resized()
 
 void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate)
 {
+    ctx.sampleRate = sampleRate;
     ctx.transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
+    ctx.leftChannelBuffer.setSize(1, samplesPerBlockExpected, false, true, true);
+    ctx.rightChannelBuffer.setSize(1, samplesPerBlockExpected, false, true, true);
+    ctx.leftChannelfftDataFifo.prepare(1, samplesPerBlockExpected);
+    ctx.rightChannelfftDataFifo.prepare(1, samplesPerBlockExpected);
 }
 
 void MainComponent::releaseResources()
@@ -43,6 +48,7 @@ void MainComponent::releaseResources()
 
 void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& bufferToFill)
 {
+    auto* buffer = bufferToFill.buffer;
     if (ctx.readerSource.get() == nullptr)
     {
         bufferToFill.clearActiveBufferRegion();
@@ -50,13 +56,8 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
     }
 
     ctx.transportSource.getNextAudioBlock(bufferToFill);
-
-    if (bufferToFill.buffer->getNumChannels() > 0)
+    for (int i = 0; i < buffer->getNumSamples(); ++i)
     {
-        auto* channelData = bufferToFill.buffer->getReadPointer(0, bufferToFill.startSample);
-        for (auto i = 0; i < bufferToFill.numSamples; ++i)
-        {
-            ctx.pushNextSampleIntoFifo(channelData[i]);
-        }
+        ctx.pushNextSampleIntoFifo(buffer->getReadPointer(0)[i], buffer->getReadPointer(1)[i]);
     }
 }

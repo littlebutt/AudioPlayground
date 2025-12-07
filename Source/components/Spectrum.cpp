@@ -4,14 +4,15 @@ Spectrum::Spectrum(AudioPlayerContext& ctx)
 : ctx(ctx)
 {
     auto fftSize = 1 << 11;
-    ctx.leftMonoBuffer.setSize(1, fftSize);
-    ctx.rightMonoBuffer.setSize(1, fftSize);
-    ctx.leftForwardFFT = std::make_unique<juce::dsp::FFT>(11);
-    ctx.leftWindow = std::make_unique<juce::dsp::WindowingFunction<float>>(fftSize, juce::dsp::WindowingFunction<float>::blackmanHarris);
-    ctx.leftChannelFFTData.clear();
-    ctx.leftChannelFFTData.resize(fftSize * 2, 0);
-
-    ctx.leftFFTDataFifo.prepare(ctx.leftChannelFFTData.size());
+    for (auto& channelContext: ctx.channelContexts)
+    {
+        channelContext.monoBuffer.setSize(1, fftSize);
+        channelContext.forwardFFT = std::make_unique<juce::dsp::FFT>(11);
+        channelContext.window = std::make_unique<juce::dsp::WindowingFunction<float>>(fftSize, juce::dsp::WindowingFunction<float>::blackmanHarris);
+        channelContext.FFTData.clear();
+        channelContext.FFTData.resize(fftSize * 2, 0);
+        channelContext.FFTDataFifo.prepare(channelContext.FFTData.size());
+    }
 
     startTimerHz(60);
 }
@@ -44,11 +45,17 @@ void Spectrum::paint(juce::Graphics& g)
         g.drawHorizontalLine(y, left, right);
     }
 
-    auto leftChannelFFTPath = ctx.leftChannelFFTPath;
+    auto leftChannelFFTPath = ctx.channelContexts[0].FFTPath;
     leftChannelFFTPath.applyTransform(AffineTransform().translation(left, top));
     
-    g.setColour(Colour(97u, 18u, 167u));
+    g.setColour(Colour(194u, 12u, 12u));
     g.strokePath(leftChannelFFTPath, PathStrokeType(1.f));
+
+    auto rightChannelFFTPath = ctx.channelContexts[1].FFTPath;
+    rightChannelFFTPath.applyTransform(AffineTransform().translation(left, top));
+    
+    g.setColour(Colour(164u, 0u, 17u));
+    g.strokePath(rightChannelFFTPath, PathStrokeType(1.f));
 
 }
 
@@ -58,45 +65,45 @@ void Spectrum::resized()
 
 void Spectrum::timerCallback()
 {
-    process(getLocalBounds().toFloat(), ctx.sampleRate);
+    process(getLocalBounds().reduced(10).toFloat(), ctx.sampleRate);
     repaint();
 }
 
 void Spectrum::process(juce::Rectangle<float> fftBounds, double sampleRate)
 {
-    juce::AudioBuffer<float> tempIncomingBuffer;
-    while (ctx.leftChannelfftDataFifo.getNumAvailableForReading() > 0)
+    for (int i = 0; i < 2; i++)
     {
-        if (ctx.leftChannelfftDataFifo.pull(tempIncomingBuffer))
+        juce::AudioBuffer<float> tempIncomingBuffer;
+        while (ctx.channelContexts[i].channelFFTDataFifo.getNumAvailableForReading() > 0)
         {
-            auto size = tempIncomingBuffer.getNumSamples();
+            if (ctx.channelContexts[i].channelFFTDataFifo.pull(tempIncomingBuffer))
+            {
+                auto size = tempIncomingBuffer.getNumSamples();
 
-            juce::FloatVectorOperations::copy(ctx.leftMonoBuffer.getWritePointer(0, 0),
-                                              ctx.leftMonoBuffer.getReadPointer(0, size),
-                                              ctx.leftMonoBuffer.getNumSamples() - size);
+                juce::FloatVectorOperations::copy(ctx.channelContexts[i].monoBuffer.getWritePointer(0, 0),
+                                                ctx.channelContexts[i].monoBuffer.getReadPointer(0, size),
+                                                ctx.channelContexts[i].monoBuffer.getNumSamples() - size);
 
-            juce::FloatVectorOperations::copy(ctx.leftMonoBuffer.getWritePointer(0, ctx.leftMonoBuffer.getNumSamples() - size),
+                juce::FloatVectorOperations::copy(ctx.channelContexts[i].monoBuffer.getWritePointer(0, ctx.channelContexts[i].monoBuffer.getNumSamples() - size),
                                               tempIncomingBuffer.getReadPointer(0, 0),
                                               size);
-            ctx.produceFFTDataForRendering(ctx.leftMonoBuffer, -48.f);
+            ctx.produceFFTDataForRendering(ctx.channelContexts[i].monoBuffer, (Channel)i, -100.f);
+            }
         }
-    }
-    
-    const auto fftSize = 1 << 11;
-    const auto binWidth = sampleRate / double(fftSize);
+        const auto fftSize = 1 << 11;
+        const auto binWidth = sampleRate / double(fftSize);
 
-    while (ctx.leftFFTDataFifo.getNumAvailableForReading() > 0)
-    {
-        std::vector<float> fftData;
-        if (ctx.leftFFTDataFifo.pull(fftData))
+        while (ctx.channelContexts[i].FFTDataFifo.getNumAvailableForReading() > 0)
         {
-            ctx.generatePath(fftData, fftBounds, fftSize, binWidth, -48.f);
+            std::vector<float> FFTData;
+            if (ctx.channelContexts[i].FFTDataFifo.pull(FFTData))
+            {
+                ctx.generatePath(FFTData, (Channel)i, fftBounds, fftSize, binWidth, -100.f);
+            }
+        }
+        while (ctx.channelContexts[i].FFTPathFifo.getNumAvailableForReading() > 0)
+        {
+            ctx.channelContexts[i].FFTPathFifo.pull(ctx.channelContexts[i].FFTPath);
         }
     }
-    
-    while (ctx.leftPathFifo.getNumAvailableForReading() > 0)
-    {
-        ctx.leftPathFifo.pull(ctx.leftChannelFFTPath);
-    }
-    // for right
 }

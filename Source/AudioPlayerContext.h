@@ -13,9 +13,9 @@ public:
 
     void pushNextSampleIntoFifo(float leftChannelSample, float rightChannelSample);
 
-    void produceFFTDataForRendering(const juce::AudioBuffer<float>& audioData, const float negativeInfinity);
+    void produceFFTDataForRendering(const juce::AudioBuffer<float>& audioData, Channel ch, const float negativeInfinity);
 
-    void generatePath(const std::vector<float>& renderData, juce::Rectangle<float> fftBounds, int fftSize, float binWidth, float negativeInfinity);
+    void generatePath(const std::vector<float>& renderData, Channel ch, juce::Rectangle<float> fftBounds, int fftSize, float binWidth, float negativeInfinity);
 
     juce::String songName;
     TransportState state;
@@ -26,17 +26,23 @@ public:
     int currentLengthSec;
     double sampleRate;
 
-    juce::AudioBuffer<float> leftChannelBuffer, rightChannelBuffer;
-    int leftChannelFifoIndex = 0, rightChannelFifoIndex = 0;
-    Fifo<juce::AudioBuffer<float>> leftChannelfftDataFifo, rightChannelfftDataFifo;
+    struct ChannelContext
+    {
+        juce::AudioBuffer<float> channelBuffer;
+        int channelFifoIndex = 0;
+        Fifo<juce::AudioBuffer<float>> channelFFTDataFifo;
 
-    juce::AudioBuffer<float> leftMonoBuffer, rightMonoBuffer;
+        juce::AudioBuffer<float> monoBuffer;
 
-    std::vector<float> leftChannelFFTData, rightChannelFFTData;
-    Fifo<std::vector<float>> leftFFTDataFifo, rightFFTDataFifo;
-    std::unique_ptr<juce::dsp::FFT> leftForwardFFT, rightForwardFFT;
-    std::unique_ptr<juce::dsp::WindowingFunction<float>> leftWindow, rightWindow;
+        std::vector<float> FFTData;
+        Fifo<std::vector<float>> FFTDataFifo;
+        std::unique_ptr<juce::dsp::FFT> forwardFFT;
+        std::unique_ptr<juce::dsp::WindowingFunction<float>> window;
 
-    Fifo<juce::Path> leftPathFifo, rightPath;
-    juce::Path leftChannelFFTPath, rightChannelFFTPath;
+        Fifo<juce::Path> FFTPathFifo;
+        juce::Path FFTPath;
+    };
+
+    ChannelContext channelContexts[2];
+
 };

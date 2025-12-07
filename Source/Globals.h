@@ -6,3 +6,9 @@ enum TransportState
     PLAYING,
     PAUSED
 };
+
+enum Channel
+{
+    LEFT,
+    RIGHT
+};

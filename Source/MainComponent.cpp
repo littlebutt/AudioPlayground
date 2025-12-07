@@ -35,10 +35,12 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
 {
     ctx.sampleRate = sampleRate;
     ctx.transportSource.prepareToPlay(samplesPerBlockExpected, sampleRate);
-    ctx.leftChannelBuffer.setSize(1, samplesPerBlockExpected, false, true, true);
-    ctx.rightChannelBuffer.setSize(1, samplesPerBlockExpected, false, true, true);
-    ctx.leftChannelfftDataFifo.prepare(1, samplesPerBlockExpected);
-    ctx.rightChannelfftDataFifo.prepare(1, samplesPerBlockExpected);
+
+    for (int i = 0; i < 2; i++)
+    {
+        ctx.channelContexts[i].channelBuffer.setSize(1, samplesPerBlockExpected, false, true, true);
+        ctx.channelContexts[i].channelFFTDataFifo.prepare(1, samplesPerBlockExpected);
+    }
 }
 
 void MainComponent::releaseResources()

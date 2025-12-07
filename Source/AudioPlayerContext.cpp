@@ -10,45 +10,48 @@ AudioPlayerContext::~AudioPlayerContext()
 
 void AudioPlayerContext::pushNextSampleIntoFifo(float leftChannelSample, float rightChannelSample)
 {
-    if (leftChannelFifoIndex == leftChannelBuffer.getNumSamples())
+    for (int i = 0; i < 2; i++)
     {
-        auto ok = leftChannelfftDataFifo.push(leftChannelBuffer);
-        juce::ignoreUnused(ok);
-        leftChannelFifoIndex = 0;
+        auto& channelContext = channelContexts[i];
+        if (channelContext.channelFifoIndex == channelContext.channelBuffer.getNumSamples())
+        {
+            auto ok = channelContext.channelFFTDataFifo.push(channelContext.channelBuffer);
+            juce::ignoreUnused(ok);
+            channelContext.channelFifoIndex = 0;
+        }
+        if (i == 0)
+        {
+           channelContext.channelBuffer.setSample(0, channelContext.channelFifoIndex, leftChannelSample); 
+        }
+        else
+        {
+            channelContext.channelBuffer.setSample(0, channelContext.channelFifoIndex, rightChannelSample); 
+        }
+        
+        ++ channelContext.channelFifoIndex;
     }
-    leftChannelBuffer.setSample(0, leftChannelFifoIndex, leftChannelSample);
-    ++ leftChannelFifoIndex;
-
-    if (rightChannelFifoIndex == rightChannelBuffer.getNumSamples())
-    {
-        auto ok = rightChannelfftDataFifo.push(rightChannelBuffer);
-        juce::ignoreUnused(ok);
-        rightChannelFifoIndex = 0;
-    }
-    rightChannelBuffer.setSample(0, rightChannelFifoIndex, rightChannelSample);
-    ++ rightChannelFifoIndex;
 }
 
-void AudioPlayerContext::produceFFTDataForRendering(const juce::AudioBuffer<float>& audioData, const float negativeInfinity)
+void AudioPlayerContext::produceFFTDataForRendering(const juce::AudioBuffer<float>& audioData, Channel ch, const float negativeInfinity)
 {
     const auto fftSize = 1 << 11;
-        
-    leftChannelFFTData.assign(leftChannelFFTData.size(), 0);
+
+    channelContexts[ch].FFTData.assign(channelContexts[ch].FFTData.size(), 0);
     auto* readIndex = audioData.getReadPointer(0);
-    std::copy(readIndex, readIndex + fftSize, leftChannelFFTData.begin());
+    std::copy(readIndex, readIndex + fftSize, channelContexts[ch].FFTData.begin());
         
     // first apply a windowing function to our data
-    leftWindow->multiplyWithWindowingTable(leftChannelFFTData.data(), fftSize);
+    channelContexts[ch].window->multiplyWithWindowingTable(channelContexts[ch].FFTData.data(), fftSize);
         
     // then render our FFT data..
-    leftForwardFFT->performFrequencyOnlyForwardTransform(leftChannelFFTData.data());
+    channelContexts[ch].forwardFFT->performFrequencyOnlyForwardTransform(channelContexts[ch].FFTData.data());
         
     int numBins = (int)fftSize / 2;
         
     //normalize the fft values.
     for( int i = 0; i < numBins; ++i )
     {
-        auto v = leftChannelFFTData[i];
+        auto v = channelContexts[ch].FFTData[i];
         if( !std::isinf(v) && !std::isnan(v) )
         {
             v /= float(numBins);
@@ -57,21 +60,19 @@ void AudioPlayerContext::produceFFTDataForRendering(const juce::AudioBuffer<floa
         {
             v = 0.f;
         }
-        leftChannelFFTData[i] = v;
+        channelContexts[ch].FFTData[i] = v;
     }
         
     //convert them to decibels
     for( int i = 0; i < numBins; ++i )
     {
-        leftChannelFFTData[i] = juce::Decibels::gainToDecibels(leftChannelFFTData[i], negativeInfinity);
+        channelContexts[ch].FFTData[i] = juce::Decibels::gainToDecibels(channelContexts[ch].FFTData[i], negativeInfinity);
     }
         
-    leftFFTDataFifo.push(leftChannelFFTData);
-
-    // for right
+    channelContexts[ch].FFTDataFifo.push(channelContexts[ch].FFTData);
 }
 
-void AudioPlayerContext::generatePath(const std::vector<float>& renderData, juce::Rectangle<float> fftBounds, int fftSize, float binWidth, float negativeInfinity)
+void AudioPlayerContext::generatePath(const std::vector<float>& renderData, Channel ch, juce::Rectangle<float> fftBounds, int fftSize, float binWidth, float negativeInfinity)
 {
     auto top = fftBounds.getY();
     auto bottom = fftBounds.getHeight();
@@ -110,7 +111,5 @@ void AudioPlayerContext::generatePath(const std::vector<float>& renderData, juce
         }
     }
 
-    leftPathFifo.push(p);
-
-    // for right
+    channelContexts[ch].FFTPathFifo.push(p);
 }

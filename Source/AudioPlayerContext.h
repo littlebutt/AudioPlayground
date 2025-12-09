@@ -17,6 +17,8 @@ public:
 
     void generatePath(const std::vector<float>& renderData, Channel ch, juce::Rectangle<float> fftBounds, int fftSize, float binWidth, float negativeInfinity);
 
+    void storePeaks(juce::AudioSampleBuffer* buffer);
+
     juce::String songName;
     TransportState state;
     juce::AudioTransportSource transportSource;
@@ -41,6 +43,9 @@ public:
 
         Fifo<juce::Path> FFTPathFifo;
         juce::Path FFTPath;
+
+        std::atomic<float> peak;
+        juce::LinearSmoothedValue<float> smoothed;
     };
 
     ChannelContext channelContexts[2];

@@ -5,6 +5,7 @@
 #include "./AudioPlayerContext.h"
 #include "components/ControlBar.h"
 #include "components/Spectrum.h"
+#include "components/VolumeUnitMeter.h"
 
 //==============================================================================
 /*
@@ -33,6 +34,7 @@ private:
     AudioPlayerContext ctx;
     ControlBar controlBar = { ctx };
     Spectrum spectrum = { ctx };
+    VolumeUnitMeter leftVUMeter, rightVUMeter;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainComponent)
 };

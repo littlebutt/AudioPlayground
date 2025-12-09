@@ -2,10 +2,13 @@
 
 //==============================================================================
 MainComponent::MainComponent()
-: ctx()
+: ctx(),
+leftVUMeter(LEFT, ctx), rightVUMeter(RIGHT, ctx)
 {
     addAndMakeVisible(spectrum);
     addAndMakeVisible(controlBar);
+    addAndMakeVisible(leftVUMeter);
+    addAndMakeVisible(rightVUMeter);
     setSize(800, 600);
     ctx.audioFormatManager.registerBasicFormats();
     setAudioChannels(0, 2);
@@ -26,7 +29,12 @@ void MainComponent::paint(juce::Graphics& g)
 void MainComponent::resized()
 {
     auto bounds = getLocalBounds();
-    spectrum.setBounds(bounds.removeFromTop(250));
+    juce::FlexBox flexBox;
+    flexBox.flexDirection = juce::FlexBox::Direction::row;
+    flexBox.items.add(juce::FlexItem(leftVUMeter).withFlex(7));
+    flexBox.items.add(juce::FlexItem(spectrum).withFlex(86));
+    flexBox.items.add(juce::FlexItem(rightVUMeter).withFlex(7));
+    flexBox.performLayout(bounds.removeFromTop(250));
     controlBar.setBounds(bounds.removeFromBottom(80));
 
 }
@@ -40,6 +48,8 @@ void MainComponent::prepareToPlay(int samplesPerBlockExpected, double sampleRate
     {
         ctx.channelContexts[i].channelBuffer.setSize(1, samplesPerBlockExpected, false, true, true);
         ctx.channelContexts[i].channelFFTDataFifo.prepare(1, samplesPerBlockExpected);
+
+        ctx.channelContexts[i].smoothed.reset(sampleRate, 0.05);
     }
 }
 
@@ -62,4 +72,5 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
     {
         ctx.pushNextSampleIntoFifo(buffer->getReadPointer(0)[i], buffer->getReadPointer(1)[i]);
     }
+    ctx.storePeaks(buffer);
 }

@@ -113,3 +113,20 @@ void AudioPlayerContext::generatePath(const std::vector<float>& renderData, Chan
 
     channelContexts[ch].FFTPathFifo.push(p);
 }
+
+void AudioPlayerContext::storePeaks(juce::AudioSampleBuffer* buffer)
+{
+    int numSamples = buffer->getNumSamples();
+    for (int i = 0; i < 2; i++)
+    {
+        float maxLevel = 0.f;
+        auto* left = buffer->getReadPointer(i);
+        for (int j = 0; j < numSamples; j++)
+        {
+            maxLevel = std::max(maxLevel, std::abs(left[j]));
+        }
+        channelContexts[i].peak.store(maxLevel);
+        channelContexts[i].smoothed.setTargetValue(maxLevel);
+    }
+    
+}

@@ -72,6 +72,7 @@ ifeq ($(CONFIG),Release)
 endif
 
 OBJECTS_APP := \
+  $(JUCE_OBJDIR)/VolumeUnitMeter_5f3cbdbb.o \
   $(JUCE_OBJDIR)/Spectrum_39cd544b.o \
   $(JUCE_OBJDIR)/ControlBar_409e2a30.o \
   $(JUCE_OBJDIR)/AudioPlayerContext_f60b78e1.o \
@@ -108,6 +109,11 @@ $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) : $(OBJECTS_APP) $(JUCE_OBJDIR)/execinfo.cmd $
 	-$(V_AT)mkdir -p $(JUCE_LIBDIR)
 	-$(V_AT)mkdir -p $(JUCE_OUTDIR)
 	$(V_AT)$(CXX) -o $(JUCE_OUTDIR)/$(JUCE_TARGET_APP) $(OBJECTS_APP) $(JUCE_LDFLAGS) $(shell cat $(JUCE_OBJDIR)/execinfo.cmd) $(JUCE_LDFLAGS_APP) $(RESOURCES) $(TARGET_ARCH)
+
+$(JUCE_OBJDIR)/VolumeUnitMeter_5f3cbdbb.o: ../../Source/components/VolumeUnitMeter.cpp
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling VolumeUnitMeter.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/Spectrum_39cd544b.o: ../../Source/components/Spectrum.cpp
 	-$(V_AT)mkdir -p $(@D)

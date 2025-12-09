@@ -8,6 +8,10 @@
     </GROUP>
     <GROUP id="{A7A9B5E2-440F-9474-A1A1-D8EB12144CC3}" name="Source">
       <GROUP id="{48B7FD60-49B3-2552-1A98-4DFB3AA98DB1}" name="components">
+        <FILE id="R4yq2k" name="VolumeUnitMeter.h" compile="0" resource="0"
+              file="Source/components/VolumeUnitMeter.h"/>
+        <FILE id="kBundt" name="VolumeUnitMeter.cpp" compile="1" resource="0"
+              file="Source/components/VolumeUnitMeter.cpp"/>
         <FILE id="nOcPNd" name="Spectrum.h" compile="0" resource="0" file="Source/components/Spectrum.h"/>
         <FILE id="gypktp" name="Spectrum.cpp" compile="1" resource="0" file="Source/components/Spectrum.cpp"/>
         <FILE id="i7EJKh" name="ControlBar.cpp" compile="1" resource="0" file="Source/components/ControlBar.cpp"/>

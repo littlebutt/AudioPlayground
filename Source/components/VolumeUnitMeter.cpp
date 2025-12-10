@@ -22,23 +22,23 @@ void VolumeUnitMeter::paint(juce::Graphics& g)
     {
         if (i < colouredRect)
         {
-            g.setColour(juce::Colour(194u, 12u, 12u));
+            g.setColour(COLOR_RED);
             if (i >= rectNum - 3)
             {
-                g.setColour(juce::Colour(164u, 0u, 17u));
+                g.setColour(COLOR_DARK_RED);
             }
             if (i >= rectNum - 1)
             {
-                g.setColour(juce::Colour(51u, 51u, 51u));
+                g.setColour(COLOR_GREY);
             }
         }
         else
         {
-            g.setColour(juce::Colour(245u, 245u, 245u));
+            g.setColour(COLOR_WHITE);
         }
         g.fillRoundedRectangle(bounds.getX(), bounds.getY() + bounds.getHeight() + 5 - int((i + 1) * unitHeight), bounds.getWidth(), unitHeight * 0.8, 3.f);
     }
-    g.setColour(juce::Colour(51u, 51u, 51u));
+    g.setColour(COLOR_GREY);
     for (int i = 0; i < rectNum; i++)
     {
         g.drawRoundedRectangle(bounds.getX(), bounds.getY() + bounds.getHeight() + 5 - int((i + 1) * unitHeight), bounds.getWidth(), unitHeight * 0.8, 3.f, 1.f);

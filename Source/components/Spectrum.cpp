@@ -48,13 +48,13 @@ void Spectrum::paint(juce::Graphics& g)
     auto leftChannelFFTPath = ctx.channelContexts[0].FFTPath;
     leftChannelFFTPath.applyTransform(AffineTransform().translation(left, top));
     
-    g.setColour(Colour(194u, 12u, 12u));
+    g.setColour(COLOR_RED);
     g.strokePath(leftChannelFFTPath, PathStrokeType(1.f));
 
     auto rightChannelFFTPath = ctx.channelContexts[1].FFTPath;
     rightChannelFFTPath.applyTransform(AffineTransform().translation(left, top));
     
-    g.setColour(Colour(164u, 0u, 17u));
+    g.setColour(COLOR_DARK_RED);
     g.strokePath(rightChannelFFTPath, PathStrokeType(1.f));
 
 }

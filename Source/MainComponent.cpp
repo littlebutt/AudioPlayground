@@ -68,6 +68,7 @@ void MainComponent::getNextAudioBlock(const juce::AudioSourceChannelInfo& buffer
     }
 
     ctx.transportSource.getNextAudioBlock(bufferToFill);
+    // buffer processing here!
     for (int i = 0; i < buffer->getNumSamples(); ++i)
     {
         ctx.pushNextSampleIntoFifo(buffer->getReadPointer(0)[i], buffer->getReadPointer(1)[i]);

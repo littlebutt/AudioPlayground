@@ -12,6 +12,9 @@
               file="Source/components/VolumeUnitMeter.h"/>
         <FILE id="kBundt" name="VolumeUnitMeter.cpp" compile="1" resource="0"
               file="Source/components/VolumeUnitMeter.cpp"/>
+        <FILE id="zGNNYq" name="RotarySlider.cpp" compile="1" resource="0"
+              file="Source/components/RotarySlider.cpp"/>
+        <FILE id="OBeMxr" name="RotarySlider.h" compile="0" resource="0" file="Source/components/RotarySlider.h"/>
         <FILE id="nOcPNd" name="Spectrum.h" compile="0" resource="0" file="Source/components/Spectrum.h"/>
         <FILE id="gypktp" name="Spectrum.cpp" compile="1" resource="0" file="Source/components/Spectrum.cpp"/>
         <FILE id="i7EJKh" name="ControlBar.cpp" compile="1" resource="0" file="Source/components/ControlBar.cpp"/>

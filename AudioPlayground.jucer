@@ -15,6 +15,9 @@
         <FILE id="zGNNYq" name="RotarySlider.cpp" compile="1" resource="0"
               file="Source/components/RotarySlider.cpp"/>
         <FILE id="OBeMxr" name="RotarySlider.h" compile="0" resource="0" file="Source/components/RotarySlider.h"/>
+        <FILE id="WgJLYG" name="ToggleButton.cpp" compile="1" resource="0"
+              file="Source/components/ToggleButton.cpp"/>
+        <FILE id="Zwwkp5" name="ToggleButton.h" compile="0" resource="0" file="Source/components/ToggleButton.h"/>
         <FILE id="nOcPNd" name="Spectrum.h" compile="0" resource="0" file="Source/components/Spectrum.h"/>
         <FILE id="gypktp" name="Spectrum.cpp" compile="1" resource="0" file="Source/components/Spectrum.cpp"/>
         <FILE id="i7EJKh" name="ControlBar.cpp" compile="1" resource="0" file="Source/components/ControlBar.cpp"/>

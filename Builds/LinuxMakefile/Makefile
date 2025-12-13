@@ -74,6 +74,7 @@ endif
 OBJECTS_APP := \
   $(JUCE_OBJDIR)/VolumeUnitMeter_5f3cbdbb.o \
   $(JUCE_OBJDIR)/RotarySlider_62c0b2ec.o \
+  $(JUCE_OBJDIR)/ToggleButton_481b9f20.o \
   $(JUCE_OBJDIR)/Spectrum_39cd544b.o \
   $(JUCE_OBJDIR)/ControlBar_409e2a30.o \
   $(JUCE_OBJDIR)/AudioPlayerContext_f60b78e1.o \
@@ -119,6 +120,11 @@ $(JUCE_OBJDIR)/VolumeUnitMeter_5f3cbdbb.o: ../../Source/components/VolumeUnitMet
 $(JUCE_OBJDIR)/RotarySlider_62c0b2ec.o: ../../Source/components/RotarySlider.cpp
 	-$(V_AT)mkdir -p $(@D)
 	@echo "Compiling RotarySlider.cpp"
+	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
+
+$(JUCE_OBJDIR)/ToggleButton_481b9f20.o: ../../Source/components/ToggleButton.cpp
+	-$(V_AT)mkdir -p $(@D)
+	@echo "Compiling ToggleButton.cpp"
 	$(V_AT)$(CXX) $(JUCE_CXXFLAGS) $(JUCE_CPPFLAGS_APP) $(JUCE_CFLAGS_APP) -o "$@" -c "$<"
 
 $(JUCE_OBJDIR)/Spectrum_39cd544b.o: ../../Source/components/Spectrum.cpp

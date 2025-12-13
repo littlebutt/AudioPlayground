@@ -7,6 +7,7 @@
 #include "components/Spectrum.h"
 #include "components/VolumeUnitMeter.h"
 #include "components/RotarySlider.h"
+#include "components/ToggleButton.h"
 
 //==============================================================================
 /*
